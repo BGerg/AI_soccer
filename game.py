@@ -99,10 +99,9 @@ class Ball(pygame.sprite.Sprite):
         self.surf = pygame.image.load("hideball.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
-    def unhide_ball(self, ball_posx, ball_posy):
+    def unhide_ball(self):
         self.surf = pygame.image.load("ball.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
-        self.rect = pygame.Rect(ball_posx, ball_posy, 31 ,32)
 
 class SoccerGate(pygame.sprite.Sprite):
     def __init__(self, position_x, position_y):
@@ -112,10 +111,13 @@ class SoccerGate(pygame.sprite.Sprite):
         self.rect = pygame.Rect(position_x, position_y, 50, 150)
         self.ball = False
 
-    def has_ball(self):
-        self.surf = pygame.image.load("goalgate.png").convert()
-        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
-
+    def has_ball(self, has):
+        if has:
+            self.surf = pygame.image.load("goalgate.png").convert()
+            self.surf.set_colorkey((255, 255, 255), RLEACCEL)
+        if not has:
+            self.surf = pygame.image.load("soccergate.png").convert()
+            self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
 
 class GoalAreaBlue(pygame.sprite.Sprite):
@@ -217,6 +219,8 @@ background_image = pygame.image.load("soccer_field.jpeg").convert()
 ADDBALL = pygame.USEREVENT + 1
 pygame.time.set_timer(ADDBALL, 250)
 
+
+
 # Instantiate player. Right now, this is just a rectangle.
 yellow_one = Player("yellow", 440, 240)
 yellow_two = Player("yellow", 390, 375)
@@ -294,25 +298,48 @@ all_sprites.add(yellow_gate)
 # Setup the clock for a decent framerate
 clock = pygame.time.Clock()
 
-# Load and play background music
-# Sound source: http://ccmixter.org/files/Apoxode/59262
-# License: https://creativecommons.org/licenses/by/3.0/
-# pygame.mixer.music.load("Apoxode_-_Electric_1.mp3")
-# pygame.mixer.music.play(loops=-1)
+def reset():
 
-# Load all sound files
-# Sound sources: Jon Fincher
-# move_up_sound = pygame.mixer.Sound("Rising_putter.ogg")
-# move_down_sound = pygame.mixer.Sound("Falling_putter.ogg")
-# collision_sound = pygame.mixer.Sound("Collision.ogg")
+    yellow_one.rect[0] = 440
+    yellow_one.rect[1] = 240
+    yellow_two.rect[0] = 390
+    yellow_two.rect[1] = 375
+    yellow_three.rect[0] = 390
+    yellow_three.rect[1] = 95
+    yellow_four.rect[0] = 255
+    yellow_four.rect[1] = 130
+    yellow_five.rect[0] = 255
+    yellow_five.rect[1] = 330
+    yellow_goalkeeper.rect[0] = 55
+    yellow_goalkeeper.rect[1] = 240
 
+    blue_one.rect[0] = 615
+    blue_one.rect[1] = 240
+    blue_two.rect[0] = 670
+    blue_two.rect[1] = 100
+    blue_three.rect[0] = 670
+    blue_three.rect[1] = 375
+    blue_four.rect[0] = 805
+    blue_four.rect[1] = 130
+    blue_five.rect[0] = 805
+    blue_five.rect[1] = 330
+    blue_goalkeeper.rect[0] = 1005
+    blue_goalkeeper.rect[1] = 240
+
+    yellow_goalkeeper.ball = False
+    yellow_goalkeeper.has_ball()
+    blue_goalkeeper.ball = False
+    blue_goalkeeper.has_ball()
+
+    yellow_gate.has_ball(False)
+    blue_gate.has_ball(False)
+
+    new_ball.add(ball)
+    new_ball.unhide_ball()
 # Variable to keep the main loop running
 running = True
-gate_kick = False
-speed_x = 0
-speed_y = 0
-ball_pos = (0,0)
-ez = True
+
+
 # Main loop
 while running:
     # for loop through the event queue
@@ -327,14 +354,11 @@ while running:
             running = False
 
     # Get the set of keys pressed and check for user input
-    pressed_keys = pygame.key.get_pressed()
+    #pressed_keys = pygame.key.get_pressed()
 
     # Update the player sprite based on user keypresses
-    yellow_one.update(pressed_keys)
+    #yellow_one.update(pressed_keys)
     # Update ball position
-
-    ball_pos = yellow_one.rect[0], yellow_one.rect[1]
-    new_ball.update((0,0))
 
 
     screen.blit(background_image, [0, 0])
@@ -344,18 +368,26 @@ while running:
     # Draw all sprites
     for entity in all_sprites:
         screen.blit(entity.surf, entity.rect)
+
+
     screen.blit(new_ball.surf, new_ball.rect)
 
     for entity in goal_areas:
         screen.blit(entity.surf, entity.rect)
 
     player_w_ball, team_wo_ball, team_w_ball = who_has_ball(all_players,yellow_team, blue_team, blue_gate)
-
+    if not player_w_ball:
+        n = random.randint(10,70)
+        pos_x_to_blue = (new_ball.rect[0] - blue_one.rect[0])/n
+        pos_y_to_blue = (new_ball.rect[1] - blue_one.rect[1])/n
+        pos_x_to_yellow = (new_ball.rect[0] - yellow_one.rect[0])/n
+        pos_y_to_yellow = (new_ball.rect[1] - yellow_one.rect[1])/n
+        blue_one.move_to((pos_x_to_blue, pos_y_to_blue ))
+        yellow_one.move_to((pos_x_to_yellow, pos_y_to_yellow ))
 
     for player in team_w_ball:
         if pygame.sprite.collide_rect(player, goal_area_blue)  and player.ball:
             n = random.randint(0, 1)
-            pos = player.rect
             player.ball = False
             player.has_ball()
 
@@ -363,13 +395,13 @@ while running:
                 blue_goalkeeper.ball = True
                 blue_goalkeeper.has_ball()
             elif n == 1 and blue_goalkeeper.ball != True:
-                blue_gate.ball = True
-                blue_gate.has_ball()
+                blue_gate.has_ball(True)
+
+            reset()
 
     for player in team_w_ball:
         if pygame.sprite.collide_rect(player, goal_area_yellow)  and player.ball:
             n = random.randint(0, 1)
-            pos = player.rect
             player.ball = False
             player.has_ball()
 
@@ -377,16 +409,17 @@ while running:
                 yellow_goalkeeper.ball = True
                 yellow_goalkeeper.has_ball()
             elif n == 1 and yellow_goalkeeper.ball != True:
-                blue_gate.ball = True
-                blue_gate.has_ball()
+                yellow_gate.has_ball(True)
+
+            reset()
 
 
     if player_w_ball:
         handle_players_collision(player_w_ball, team_wo_ball, team_w_ball)
         closest_player = get_closest_player(team_wo_ball, player_w_ball)
-        n = random.randint(1,10)
-        pos_x = (player_w_ball.rect[0] - closest_player.rect[0])/(10*n)
-        pos_y = (player_w_ball.rect[1] - closest_player.rect[1])/(10*n)
+        n = random.randint(10,30)
+        pos_x = (player_w_ball.rect[0] - closest_player.rect[0])/n
+        pos_y = (player_w_ball.rect[1] - closest_player.rect[1])/n
         closest_player.move_to((pos_x,pos_y))
         move_players_to_enemy_gate(blue_team, yellow_team, blue_gate, yellow_gate, team_w_ball)
 
@@ -397,7 +430,7 @@ while running:
         yellow_one.ball = True
         yellow_one.has_ball()
         new_ball.hide_ball()
-        new_ball.kill()
+        new_ball.remove(ball)
 
     # Check if any ball have collided with the player
     if pygame.sprite.spritecollideany(blue_one, ball):
@@ -405,7 +438,7 @@ while running:
         yellow_one.ball = True
         yellow_one.has_ball()
         new_ball.hide_ball()
-        new_ball.kill()
+        new_ball.remove(ball)
 
     # Update the display
     pygame.display.flip()
