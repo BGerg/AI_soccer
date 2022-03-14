@@ -63,7 +63,7 @@ class Player(pygame.sprite.Sprite):
         if self.rect.bottom >= SCREEN_HEIGHT:
             self.rect.bottom = SCREEN_HEIGHT
 
-    def follow_ball(self, ball_pos):
+    def move_to(self, ball_pos):
         self.rect.move_ip(ball_pos)
 
     def has_ball(self):
@@ -117,6 +117,7 @@ class SoccerGate(pygame.sprite.Sprite):
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
 
+
 class GoalAreaBlue(pygame.sprite.Sprite):
     def __init__(self):
         super(GoalAreaBlue, self).__init__()
@@ -147,6 +148,58 @@ def get_closest_player(team, player_w_ball):
 
     return closest_player
 
+
+def handle_players_collision(player_w_ball, team_wo_ball, team_w_ball):
+    action_number = random.randint(0, 2)
+    for player_wo_ball in team_wo_ball:
+        if pygame.sprite.collide_rect(player_w_ball, player_wo_ball):
+            #if action_number == 0:
+             #   pass
+            if action_number == 1:
+                closest_player = get_closest_player(team_w_ball, player_w_ball)
+                player_w_ball.ball = False
+                closest_player.ball = True
+                closest_player.has_ball()
+                player_w_ball.has_ball()
+            elif action_number == 2:
+                player_w_ball.ball = False
+                player_wo_ball.ball = True
+                player_wo_ball.has_ball()
+                player_w_ball.has_ball()
+            break
+
+def who_has_ball(all_players, yellow_team, blue_team, gates):
+    team_wo_ball = ""
+    team_w_ball = ""
+    player_w_ball = ""
+    for player in all_players:
+        if player.ball:
+            player_w_ball = player
+
+    if player_w_ball in yellow_team:
+        team_wo_ball = blue_team
+        team_w_ball = yellow_team
+    else:
+        team_wo_ball = yellow_team
+        team_w_ball = blue_team
+
+    return player_w_ball, team_wo_ball, team_w_ball
+
+def move_players_to_enemy_gate(b_team, y_team, b_gate, y_gate, team_ball):
+    for player in y_team:
+        if player in team_ball:
+            a = "1" + (len(str(abs(player.rect[0] - b_gate.rect[0])))-1)*"0"
+            b = "1" + (len(str(abs(player.rect[1] - b_gate.rect[1])))-1)*"0"
+            pos_x = (b_gate.rect[0]- player.rect[0]) / (int(a)+10)
+            pos_y = (b_gate.rect[1]- player.rect[1]) / (int(b)+10)
+            player.move_to((pos_x, pos_y))
+    for player in b_team:
+        if player in team_ball:
+            a = "1" + (len(str(abs(player.rect[0] - y_gate.rect[0])))-1)*"0"
+            b = "1" + (len(str(abs(player.rect[1] - y_gate.rect[1])))-1)*"0"
+            pos_x = (y_gate.rect[0]- player.rect[0]) / (int(a)+10)
+            pos_y = (y_gate.rect[1]- player.rect[1]) / (int(b)+10)
+            player.move_to((pos_x, pos_y))
 
 
 
@@ -192,6 +245,7 @@ ball = pygame.sprite.Group()
 yellow_team = pygame.sprite.Group()
 blue_team = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
+all_players = pygame.sprite.Group()
 soccer_gates = pygame.sprite.Group()
 goal_areas = pygame.sprite.Group()
 
@@ -200,12 +254,15 @@ yellow_team.add(yellow_two)
 yellow_team.add(yellow_three)
 yellow_team.add(yellow_four)
 yellow_team.add(yellow_five)
-yellow_team.add(yellow_goalkeeper)
-
-
 
 
 blue_team.add(blue_one)
+blue_team.add(blue_two)
+blue_team.add(blue_three)
+blue_team.add(blue_four)
+blue_team.add(blue_five)
+
+
 ball.add(new_ball)
 
 soccer_gates.add(blue_gate)
@@ -214,7 +271,8 @@ soccer_gates.add(yellow_gate)
 goal_areas.add(goal_area_yellow)
 goal_areas.add(goal_area_blue)
 
-#all_sprites.add(new_ball)
+all_players.add(blue_team)
+all_players.add(yellow_team)
 all_sprites.add(yellow_one)
 all_sprites.add(yellow_two)
 all_sprites.add(yellow_three)
@@ -229,9 +287,9 @@ all_sprites.add(blue_four)
 all_sprites.add(blue_five)
 all_sprites.add(blue_goalkeeper)
 
-all_sprites.add(soccer_gates)
-a = yellow_one.rect[0]
-b = yellow_one.rect[1]
+all_sprites.add(blue_gate)
+all_sprites.add(yellow_gate)
+
 
 # Setup the clock for a decent framerate
 clock = pygame.time.Clock()
@@ -254,7 +312,7 @@ gate_kick = False
 speed_x = 0
 speed_y = 0
 ball_pos = (0,0)
-
+ez = True
 # Main loop
 while running:
     # for loop through the event queue
@@ -268,7 +326,6 @@ while running:
         elif event.type == QUIT:
             running = False
 
-
     # Get the set of keys pressed and check for user input
     pressed_keys = pygame.key.get_pressed()
 
@@ -277,10 +334,6 @@ while running:
     # Update ball position
 
     ball_pos = yellow_one.rect[0], yellow_one.rect[1]
-    if yellow_one.ball:
-        pos_x = (yellow_one.rect[0] - blue_one.rect[0])/12
-        pos_y = (yellow_one.rect[1] - blue_one.rect[1])/12
-        blue_one.follow_ball((pos_x,pos_y))
     new_ball.update((0,0))
 
 
@@ -296,71 +349,55 @@ while running:
     for entity in goal_areas:
         screen.blit(entity.surf, entity.rect)
 
-    if pygame.sprite.collide_rect(yellow_one, blue_one):
-        if blue_one.ball:
-            yellow_one.ball = True
-            blue_one.ball = False
-            yellow_one.has_ball()
-            blue_one.has_ball()
-        elif yellow_one.ball:
-            closest_player = get_closest_player(yellow_team, yellow_one)
-            yellow_one.ball = False
-            closest_player.ball = True
-            closest_player.has_ball()
-            yellow_one.has_ball()
+    player_w_ball, team_wo_ball, team_w_ball = who_has_ball(all_players,yellow_team, blue_team, blue_gate)
 
 
-    if pygame.sprite.collide_rect(yellow_one, goal_area_blue) and gate_kick == False:
-        n = random.randint(0, 1)
-        pos = yellow_one.rect
-        yellow_one.ball = False
-        yellow_one.has_ball()
+    for player in team_w_ball:
+        if pygame.sprite.collide_rect(player, goal_area_blue)  and player.ball:
+            n = random.randint(0, 1)
+            pos = player.rect
+            player.ball = False
+            player.has_ball()
 
-        # appx = 20
-        #appy = 260
-        #a = SCREEN_HEIGHT/2-appy
-        #b = SCREEN_WIDTH-appx
-        #ratio = b/a
-        #print(ratio)
-        #if appy > SCREEN_HEIGHT/2:
-        #    appy *= -1
-        #new_ball.unhide_ball(appx, appy)
+            if n == 0 and blue_gate.ball != True:
+                blue_goalkeeper.ball = True
+                blue_goalkeeper.has_ball()
+            elif n == 1 and blue_goalkeeper.ball != True:
+                blue_gate.ball = True
+                blue_gate.has_ball()
+
+    for player in team_w_ball:
+        if pygame.sprite.collide_rect(player, goal_area_yellow)  and player.ball:
+            n = random.randint(0, 1)
+            pos = player.rect
+            player.ball = False
+            player.has_ball()
+
+            if n == 0 and blue_gate.ball != True:
+                yellow_goalkeeper.ball = True
+                yellow_goalkeeper.has_ball()
+            elif n == 1 and yellow_goalkeeper.ball != True:
+                blue_gate.ball = True
+                blue_gate.has_ball()
 
 
-        #ball_pos = (ratio*1,1)
-        gate_kick = True
-        if n == 0:
-            blue_goalkeeper.ball = True
-            blue_goalkeeper.has_ball()
-        elif n == 1 :
-            blue_gate.has_ball()
+    if player_w_ball:
+        handle_players_collision(player_w_ball, team_wo_ball, team_w_ball)
+        closest_player = get_closest_player(team_wo_ball, player_w_ball)
+        n = random.randint(1,10)
+        pos_x = (player_w_ball.rect[0] - closest_player.rect[0])/(10*n)
+        pos_y = (player_w_ball.rect[1] - closest_player.rect[1])/(10*n)
+        closest_player.move_to((pos_x,pos_y))
+        move_players_to_enemy_gate(blue_team, yellow_team, blue_gate, yellow_gate, team_w_ball)
 
-    if yellow_one.ball:
-        speed_x = 0
-        speed_y = 0
-        if yellow_one.rect[0] != a or yellow_one.rect[1] != b:
-            if yellow_one.rect[0] > a:
-                speed_x = 5
-            elif yellow_one.rect[0] < a:
-                speed_x = -5
-            if yellow_one.rect[1] > b:
-                speed_y = 5
-            elif yellow_one.rect[1] < b:
-                speed_y = -5
-        a = yellow_one.rect[0]
-        b = yellow_one.rect[1]
 
-        #new_ball.update((speed_x, speed_y))
 
     if pygame.sprite.spritecollideany(yellow_one, ball):
         # If so, then remove the player and stop the loop
         yellow_one.ball = True
         yellow_one.has_ball()
         new_ball.hide_ball()
-        # # Stop any moving sounds and play the collision sound
-        # move_up_sound.stop()
-        # move_down_sound.stop()
-        # collision_sound.play()
+        new_ball.kill()
 
     # Check if any ball have collided with the player
     if pygame.sprite.spritecollideany(blue_one, ball):
@@ -368,16 +405,9 @@ while running:
         yellow_one.ball = True
         yellow_one.has_ball()
         new_ball.hide_ball()
-        # # Stop any moving sounds and play the collision sound
-        # move_up_sound.stop()
-        # move_down_sound.stop()
-        # collision_sound.play()
+        new_ball.kill()
 
     # Update the display
     pygame.display.flip()
     # Ensure program maintains a rate of 30 frames per second
     clock.tick(30)
-
-# # At this point, we're done, so we can stop and quit the mixer
-# pygame.mixer.music.stop()
-# pygame.mixer.quit()
