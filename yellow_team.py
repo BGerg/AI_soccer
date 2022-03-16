@@ -1,4 +1,3 @@
-import pickle
 import socket
 
 ClientSocket = socket.socket()
@@ -11,12 +10,11 @@ try:
 except socket.error as e:
     print(str(e))
 
-HEADERSIZE = 10
 Response = ClientSocket.recv(1024)
 while True:
     Input = input('Say Something: ')
     ClientSocket.send(str.encode(Input))
     Response = ClientSocket.recv(1024)
-    print(pickle.loads(Response[HEADERSIZE:]))
+    print(Response.decode('utf-8'))
 
 ClientSocket.close()

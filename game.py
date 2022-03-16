@@ -23,13 +23,13 @@ SCREEN_WIDTH = int(1.869*SCREEN_HEIGHT)
 # Define a player object by extending pygame.sprite.Sprite
 # The surface drawn on the screen is now an attribute of 'player'
 class Player(pygame.sprite.Sprite):
-    def __init__(self,player_color, player_posx, player_posy):
+    def __init__(self,color, player_posx, player_posy):
         super(Player, self).__init__()
-        self.player_color = player_color
-        if self.player_color == "blue":
-            self.surf = pygame.image.load("player_blue.png").convert()
-        elif self.player_color == "yellow":
-            self.surf = pygame.image.load("player_yellow.png").convert()
+        self.color = color
+        if self.color == "blue":
+            self.surf = pygame.image.load("images/player_blue.png").convert()
+        elif self.color == "yellow":
+            self.surf = pygame.image.load("images/player_yellow.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = pygame.Rect(player_posx, player_posy, 44, 77)
         self.ball = False
@@ -63,20 +63,42 @@ class Player(pygame.sprite.Sprite):
         if self.rect.bottom >= SCREEN_HEIGHT:
             self.rect.bottom = SCREEN_HEIGHT
 
-    def move_to(self, ball_pos):
-        self.rect.move_ip(ball_pos)
+    def move_to(self, position):
+        self.rect.move_ip(position)
 
     def has_ball(self):
-        if self.player_color == "yellow" and self.ball == False:
-            self.surf = pygame.image.load("player_yellow.png").convert()
-        elif self.player_color == "blue" and self.ball == False:
-            self.surf = pygame.image.load("player_blue.png").convert()
-        elif self.player_color == "yellow" and self.ball:
-            self.surf = pygame.image.load("player_yellow_w_ball.png").convert()
-        elif self.player_color == "blue" and self.ball:
-            self.surf = pygame.image.load("player_blue_w_ball.png").convert()
+        if self.color == "yellow" and self.ball == False:
+            self.surf = pygame.image.load("images/player_yellow.png").convert()
+        elif self.color == "blue" and self.ball == False:
+            self.surf = pygame.image.load("images/player_blue.png").convert()
+        elif self.color == "yellow" and self.ball:
+            self.surf = pygame.image.load("images/player_yellow_w_ball.png").convert()
+        elif self.color == "blue" and self.ball:
+            self.surf = pygame.image.load("images/player_blue_w_ball.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
+class PlayerGoalKeeper(pygame.sprite.Sprite):
+    def __init__(self,color, player_posx, player_posy):
+        super(PlayerGoalKeeper, self).__init__()
+        self.color = color
+        if self.color == "blue":
+            self.surf = pygame.image.load("images/goolkeeper_1.png").convert()
+        elif self.color == "yellow":
+            self.surf = pygame.image.load("images/goolkeeper_2.png").convert()
+        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
+        self.rect = pygame.Rect(player_posx, player_posy, 44, 77)
+        self.ball = False
+
+    def has_ball(self):
+        if self.color == "yellow" and self.ball == False:
+            self.surf = pygame.image.load("images/goolkeeper_2.png").convert()
+        elif self.color == "blue" and self.ball == False:
+            self.surf = pygame.image.load("images/goolkeeper_1.png").convert()
+        elif self.color == "yellow" and self.ball:
+            self.surf = pygame.image.load("images/goolkeeper_goal_1.png").convert()
+        elif self.color == "blue" and self.ball:
+            self.surf = pygame.image.load("images/goolkeeper_goal_2.png").convert()
+        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
 
 # Define the ball object by extending pygame.sprite.Sprite
@@ -84,7 +106,7 @@ class Player(pygame.sprite.Sprite):
 class Ball(pygame.sprite.Sprite):
     def __init__(self):
         super(Ball, self).__init__()
-        self.surf = pygame.image.load("ball.png").convert()
+        self.surf = pygame.image.load("images/ball.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = self.surf.get_rect(
             center=((SCREEN_WIDTH/2),SCREEN_HEIGHT/2))
@@ -96,41 +118,41 @@ class Ball(pygame.sprite.Sprite):
         self.rect.move_ip(positions)
 
     def hide_ball(self):
-        self.surf = pygame.image.load("hideball.png").convert()
+        self.surf = pygame.image.load("images/hideball.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
     def unhide_ball(self):
-        self.surf = pygame.image.load("ball.png").convert()
+        self.surf = pygame.image.load("images/ball.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
 class SoccerGate(pygame.sprite.Sprite):
     def __init__(self, position_x, position_y):
         super(SoccerGate, self).__init__()
-        self.surf = pygame.image.load("soccergate.png").convert()
+        self.surf = pygame.image.load("images/soccergate.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = pygame.Rect(position_x, position_y, 50, 150)
         self.ball = False
 
     def has_ball(self, has):
         if has:
-            self.surf = pygame.image.load("goalgate.png").convert()
+            self.surf = pygame.image.load("images/goalgate.png").convert()
             self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         if not has:
-            self.surf = pygame.image.load("soccergate.png").convert()
+            self.surf = pygame.image.load("images/soccergate.png").convert()
             self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
 
 class GoalAreaBlue(pygame.sprite.Sprite):
     def __init__(self):
         super(GoalAreaBlue, self).__init__()
-        self.surf = pygame.image.load("goalfiled.png").convert()
+        self.surf = pygame.image.load("images/goalfiled.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = pygame.Rect(SCREEN_WIDTH-(160+50), SCREEN_HEIGHT/2-325/2, 162, 325)
 
 class GoalAreaYellow(pygame.sprite.Sprite):
     def __init__(self):
         super(GoalAreaYellow, self).__init__()
-        self.surf = pygame.image.load("goalfiled.png").convert()
+        self.surf = pygame.image.load("images/goalfiled.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = pygame.Rect(50, SCREEN_HEIGHT/2-325/2, 162, 325)
 
@@ -150,6 +172,9 @@ def get_closest_player(team, player_w_ball):
 
     return closest_player
 
+def get_random_other_player_his_team(team):
+    return random.choice(list(team))
+
 
 def handle_players_collision(player_w_ball, team_wo_ball, team_w_ball):
     action_number = random.randint(0, 2)
@@ -158,10 +183,11 @@ def handle_players_collision(player_w_ball, team_wo_ball, team_w_ball):
             #if action_number == 0:
              #   pass
             if action_number == 1:
-                closest_player = get_closest_player(team_w_ball, player_w_ball)
+                teammate = get_random_other_player_his_team(team_w_ball)
+                #closest_player = get_closest_player(team_w_ball, player_w_ball)
                 player_w_ball.ball = False
-                closest_player.ball = True
-                closest_player.has_ball()
+                teammate.ball = True
+                teammate.has_ball()
                 player_w_ball.has_ball()
             elif action_number == 2:
                 player_w_ball.ball = False
@@ -204,9 +230,38 @@ def move_players_to_enemy_gate(b_team, y_team, b_gate, y_gate, team_ball):
             player.move_to((pos_x, pos_y))
 
 
+def check_goal(team_w_ball):
+    for player in team_w_ball:
+        if player.color == "yellow":
+            goal_area = goal_area_blue
+            goal_keeper = blue_goalkeeper
+            gate = blue_gate
+        elif player.color == "blue":
+            goal_area = goal_area_yellow
+            goal_keeper = yellow_goalkeeper
+            gate = yellow_gate
+        if pygame.sprite.collide_rect(player, goal_area) and player.ball:
+            n = random.randint(0, 1)
+            player.ball = False
+            player.has_ball()
 
-# Setup for sounds. Defaults are good.
-#pygame.mixer.init()
+            if n == 0 and blue_gate.ball != True:
+                goal_keeper.ball = True
+                goal_keeper.has_ball()
+            elif n == 1 and goal_keeper.ball != True:
+                gate.has_ball(True)
+
+            reset()
+
+def catch_ball_first(player_w_ball):
+    if not player_w_ball:
+        n = random.randint(10,70)
+        pos_x_to_blue = (new_ball.rect[0] - blue_one.rect[0])/n
+        pos_y_to_blue = (new_ball.rect[1] - blue_one.rect[1])/n
+        pos_x_to_yellow = (new_ball.rect[0] - yellow_one.rect[0])/n
+        pos_y_to_yellow = (new_ball.rect[1] - yellow_one.rect[1])/n
+        blue_one.move_to((pos_x_to_blue, pos_y_to_blue ))
+        yellow_one.move_to((pos_x_to_yellow, pos_y_to_yellow ))
 
 # Initialize pygame
 pygame.init()
@@ -214,7 +269,7 @@ pygame.init()
 # Create the screen object
 # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-background_image = pygame.image.load("soccer_field.jpeg").convert()
+background_image = pygame.image.load("images/soccer_field.jpeg").convert()
 # Create a custom event for adding a new ball
 ADDBALL = pygame.USEREVENT + 1
 pygame.time.set_timer(ADDBALL, 250)
@@ -227,14 +282,14 @@ yellow_two = Player("yellow", 390, 375)
 yellow_three = Player("yellow", 390, 95)
 yellow_four = Player("yellow", 255, 130)
 yellow_five = Player("yellow", 255, 330)
-yellow_goalkeeper = Player("yellow", 55, 240)
+yellow_goalkeeper = PlayerGoalKeeper("yellow",50, 240)
 
 blue_one = Player("blue", 615, 240)
 blue_two = Player("blue", 670, 100)
 blue_three = Player("blue", 670, 375)
 blue_four = Player("blue", 805, 130)
 blue_five = Player("blue", 805, 330)
-blue_goalkeeper = Player("blue", 1005, 240)
+blue_goalkeeper = PlayerGoalKeeper("blue", 1005, 240)
 
 new_ball = Ball()
 blue_gate = SoccerGate(SCREEN_WIDTH-50, SCREEN_HEIGHT/2-150/2)
@@ -310,8 +365,6 @@ def reset():
     yellow_four.rect[1] = 130
     yellow_five.rect[0] = 255
     yellow_five.rect[1] = 330
-    yellow_goalkeeper.rect[0] = 55
-    yellow_goalkeeper.rect[1] = 240
 
     blue_one.rect[0] = 615
     blue_one.rect[1] = 240
@@ -323,8 +376,7 @@ def reset():
     blue_four.rect[1] = 130
     blue_five.rect[0] = 805
     blue_five.rect[1] = 330
-    blue_goalkeeper.rect[0] = 1005
-    blue_goalkeeper.rect[1] = 240
+
 
     yellow_goalkeeper.ball = False
     yellow_goalkeeper.has_ball()
@@ -353,66 +405,18 @@ while running:
         elif event.type == QUIT:
             running = False
 
-    # Get the set of keys pressed and check for user input
-    #pressed_keys = pygame.key.get_pressed()
-
-    # Update the player sprite based on user keypresses
-    #yellow_one.update(pressed_keys)
-    # Update ball position
-
-
     screen.blit(background_image, [0, 0])
-    # Draw the player on the screen
-    screen.blit(yellow_one.surf, yellow_one.rect)
-
-    # Draw all sprites
-    for entity in all_sprites:
-        screen.blit(entity.surf, entity.rect)
-
-
     screen.blit(new_ball.surf, new_ball.rect)
 
+    for entity in all_sprites:
+        screen.blit(entity.surf, entity.rect)
     for entity in goal_areas:
         screen.blit(entity.surf, entity.rect)
 
+
     player_w_ball, team_wo_ball, team_w_ball = who_has_ball(all_players,yellow_team, blue_team, blue_gate)
-    if not player_w_ball:
-        n = random.randint(10,70)
-        pos_x_to_blue = (new_ball.rect[0] - blue_one.rect[0])/n
-        pos_y_to_blue = (new_ball.rect[1] - blue_one.rect[1])/n
-        pos_x_to_yellow = (new_ball.rect[0] - yellow_one.rect[0])/n
-        pos_y_to_yellow = (new_ball.rect[1] - yellow_one.rect[1])/n
-        blue_one.move_to((pos_x_to_blue, pos_y_to_blue ))
-        yellow_one.move_to((pos_x_to_yellow, pos_y_to_yellow ))
-
-    for player in team_w_ball:
-        if pygame.sprite.collide_rect(player, goal_area_blue)  and player.ball:
-            n = random.randint(0, 1)
-            player.ball = False
-            player.has_ball()
-
-            if n == 0 and blue_gate.ball != True:
-                blue_goalkeeper.ball = True
-                blue_goalkeeper.has_ball()
-            elif n == 1 and blue_goalkeeper.ball != True:
-                blue_gate.has_ball(True)
-
-            reset()
-
-    for player in team_w_ball:
-        if pygame.sprite.collide_rect(player, goal_area_yellow)  and player.ball:
-            n = random.randint(0, 1)
-            player.ball = False
-            player.has_ball()
-
-            if n == 0 and blue_gate.ball != True:
-                yellow_goalkeeper.ball = True
-                yellow_goalkeeper.has_ball()
-            elif n == 1 and yellow_goalkeeper.ball != True:
-                yellow_gate.has_ball(True)
-
-            reset()
-
+    catch_ball_first(player_w_ball)
+    check_goal(team_w_ball)
 
     if player_w_ball:
         handle_players_collision(player_w_ball, team_wo_ball, team_w_ball)
