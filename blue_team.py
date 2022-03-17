@@ -1,34 +1,49 @@
-import socket, threading
+import socket
+import pickle
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)      #socket initialization
-client.connect(('127.0.0.1', 7976))                             #connecting client to server
+HEADERSIZE_ONE = 10
 
-class ClientHandle:
-    msg = b""
-    already_sent = False
-    def receive(self):
-        while True:                                                 #making valid connection
-            try:
-                self.msg = client.recv(1024)
-                self.already_sent = False
-                print(self.msg)
-            except Exception as e:  # case on wrong ip/port details
-                print(f"An error occured! {e}")
-                client.close()
-                break
-    def write(self):
-        while True:                                                   #message layout
-            if not self.already_sent:
-                client.send(self.msg+b"a")
-                self.already_sent = True
-            else:
-                pass
+my_username = "blue_team"
 
-    def run(self):
-        receive_thread = threading.Thread(target=self.receive)               #receiving multiple messages
-        receive_thread.start()
-        write_thread = threading.Thread(target=self.write)                   #sending messages
-        write_thread.start()
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((socket.gethostname(), 1243))
 
-c_hand = ClientHandle()
-c_hand.run()
+def send_dict(dict_to_send, client):
+    msg = pickle.dumps(dict_to_send)
+    msg = bytes(f"{len(msg):<{HEADERSIZE_ONE}}", 'utf-8') + msg
+    print("itt")
+    client.send(msg)
+ez = "a"
+while True:
+    full_msg = b''
+    new_msg = True
+    while True:
+        msg = s.recv(16)
+        if new_msg:
+            msglen = int(msg[:HEADERSIZE_ONE])
+            new_msg = False
+        full_msg += msg
+
+        if len(full_msg)-HEADERSIZE_ONE == msglen:
+            result = pickle.loads(full_msg[HEADERSIZE_ONE:])
+            print(result)
+            new_msg = True
+            full_msg = b""
+
+            result[ez] = "fa"
+
+            send_dict(result,s)
+            ez += "a"
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,54 +1,49 @@
-#Coded by Yashraj Singh Chouhan
-import socket, threading                                                #Libraries import
+import socket
 import time
+import pickle
 
-host = '127.0.0.1'                                                      #LocalHost
-port = 7976                                                             #Choosing unreserved port
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)              #socket initialization
-server.bind((host, port))                                               #binding host and port to socket
-server.listen()
+HEADERSIZE_ONE = 10
 
-clients = []
-teams = {}
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind((socket.gethostname(), 1243))
+s.listen(5)
 
-def broadcast(message):
-    for client in clients:
-        client.send(message)
+def send_dict(dict_to_send, client):
+    msg = pickle.dumps(dict_to_send)
+    msg = bytes(f"{len(msg):<{HEADERSIZE_ONE}}", 'utf-8') + msg
+    print("itt")
+    client.send(msg)
+bikazo = True
+ez = "a"
+while True:
+    # now our endpoint knows about the OTHER endpoint.
+    clientsocket, address = s.accept()
+    print(f"Connection from {address} has been established.")
 
-def handle(client):
+    if bikazo:
+        d = {1:"hi", 2: "there"}
+        send_dict(d, clientsocket)
+
+    full_msg = b''
+    new_msg = True
     while True:
-        #time.sleep(1)
-        try:                                                            #recieving valid messages from client
-            message = client.recv(1024)
-            if client == teams["blue_team"]:
-                receiver = teams["yellow_team"]
-                receiver.send(message)
-            if client == teams["yellow_team"]:
-                receiver = teams["blue_team"]
-                receiver.send(message)
-        except:                                                         #removing clients
-            index = clients.index(client)
-            clients.remove(client)
-            client.close()
+        msg = clientsocket.recv(16)
+        if new_msg:
+            msglen = int(msg[:HEADERSIZE_ONE])
+            new_msg = False
 
-            break
+        full_msg += msg
 
-def receive():
-    while True:
-        client, address = server.accept()
-        print("Connected with {}".format(str(address)))
-        clients.append(client)
-        if "blue_team" in teams:
-            teams["yellow_team"] = client
-        else:
-            teams["blue_team"] = client
-        if len(clients) == 2:
-            #broadcast("{} joined!".format(nickname).encode('ascii'))
-            #broadcast('Connected to server!'.encode('ascii'))
-            for client in clients:
-                thread = threading.Thread(target=handle, args=(client,))
-                thread.start()
+        if len(full_msg) - HEADERSIZE_ONE == msglen:
+            result = pickle.loads(full_msg[HEADERSIZE_ONE:])
+            print(result)
+            new_msg = True
+            full_msg = b""
 
 
-receive()
+            result[ez] = "fa"
+
+            send_dict(result,clientsocket)
+            ez += "a"
+            continue
