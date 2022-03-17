@@ -17,8 +17,8 @@ class ClientHandle:
                 else:
                     self.msg = message
                     print(message)
-            except:                                                 #case on wrong ip/port details
-                print("An error occured!")
+            except Exception as e:  # case on wrong ip/port details
+                print(f"An error occured! {e}")
                 client.close()
                 break
     def write(self):
