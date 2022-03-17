@@ -1,29 +1,39 @@
-import json
+
 import socket, threading
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)      #socket initialization
 client.connect(('127.0.0.1', 7976))                             #connecting client to server
+HEADERSIZE_ONE = 10
 
 class ClientHandle:
     msg = b""
     already_sent = False
+    msglen = 0
+    result = ""
     def receive(self):
+        full_msg = b''
+        new_msg = True
         while True:                                                 #making valid connection
-            try:
-                self.msg = client.recv(1024)
+            msg = client.recv(16)
+            if new_msg and msg != b'':
+                self.msglen = int(msg[:HEADERSIZE_ONE])
+                new_msg = False
+            full_msg += msg
+
+            if len(full_msg) - HEADERSIZE_ONE == self.msglen:
+                self.result = pickle.loads(full_msg[HEADERSIZE_ONE:])
+                print(self.result)
+                new_msg = True
+                full_msg = b""
+                msglen = 0
                 self.already_sent = False
-                print(json.loads(self.msg))
-            except Exception as e:  # case on wrong ip/port details
-                print(f"An error occured! {e}")
-                client.close()
-                break
+
     def write(self):
         while True:                                                   #message layout
             if not self.already_sent:
-                a = {"dsf": "erz"}
-                a = json.dumps(a)
-                a = bytes(a, 'UTF-8')
-                client.send(a)
+                msg = pickle.dumps(self.result)
+                msg = bytes(f"{len(msg):<{HEADERSIZE_ONE}}", 'utf-8') + msg
+                client.send(msg)
                 self.already_sent = True
             else:
                 pass
