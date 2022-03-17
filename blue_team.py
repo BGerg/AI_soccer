@@ -1,22 +1,39 @@
-import pickle
-import socket
+import socket, threading
+nickname = "blue_team"
 
-ClientSocket = socket.socket()
-host = '127.0.0.1'
-port = 1233
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)      #socket initialization
+client.connect(('127.0.0.1', 7976))                             #connecting client to server
 
-print('Waiting for connection')
-try:
-    ClientSocket.connect((host, port))
-except socket.error as e:
-    print(str(e))
+class ClientHandle:
+    msg = ""
+    already_sent = False
+    def receive(self):
+        while True:                                                 #making valid connection
+            try:
+                message = client.recv(1024).decode('ascii')
+                self.already_sent = False
+                if message == 'NICKNAME':
+                    client.send(nickname.encode('ascii'))
+                else:
+                    print(message)
+            except:                                                 #case on wrong ip/port details
+                print("An error occured!")
+                client.close()
+                break
+    def write(self):
+        while True:                                                   #message layout
+            if not self.already_sent:
+                message = '{}: {}'.format(nickname, input(''))
+                self.already_sent = True
+                client.send(message.encode('ascii'))
+            else:
+                pass
 
-HEADERSIZE = 10
-Response = ClientSocket.recv(1024)
-while True:
-    Input = input('Say Something: ')
-    ClientSocket.send(str.encode(Input))
-    Response = ClientSocket.recv(1024)
-    print(pickle.loads(Response[HEADERSIZE:]))
+    def run(self):
+        receive_thread = threading.Thread(target=self.receive)               #receiving multiple messages
+        receive_thread.start()
+        write_thread = threading.Thread(target=self.write)                   #sending messages
+        write_thread.start()
 
-ClientSocket.close()
+c_hand = ClientHandle()
+c_hand.run()
