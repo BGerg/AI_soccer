@@ -1,5 +1,6 @@
 #Coded by Yashraj Singh Chouhan
 import socket, threading                                                #Libraries import
+import time
 
 host = '127.0.0.1'                                                      #LocalHost
 port = 7976                                                             #Choosing unreserved port
@@ -17,6 +18,7 @@ def broadcast(message):
 
 def handle(client):
     while True:
+        #time.sleep(1)
         try:                                                            #recieving valid messages from client
             message = client.recv(1024)
             if client == teams["blue_team"]:
@@ -47,9 +49,13 @@ def receive():
         elif nickname == "yellow_team":
             teams["yellow_team"] = client
         print("Nickname is {}".format(nickname))
-        broadcast("{} joined!".format(nickname).encode('ascii'))
-        client.send('Connected to server!'.encode('ascii'))
-        thread = threading.Thread(target=handle, args=(client,))
-        thread.start()
+        if len(clients) == 2:
+            #broadcast("{} joined!".format(nickname).encode('ascii'))
+            #broadcast('Connected to server!'.encode('ascii'))
+            for client in clients:
+                thread = threading.Thread(target=handle, args=(client,))
+                thread.start()
+        elif len(clients) == 1:
+            client.send('Waiting for other player to join...'.encode('ascii'))
 
 receive()

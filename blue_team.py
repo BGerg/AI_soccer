@@ -15,6 +15,7 @@ class ClientHandle:
                 if message == 'NICKNAME':
                     client.send(nickname.encode('ascii'))
                 else:
+                    self.msg = message
                     print(message)
             except:                                                 #case on wrong ip/port details
                 print("An error occured!")
@@ -23,9 +24,9 @@ class ClientHandle:
     def write(self):
         while True:                                                   #message layout
             if not self.already_sent:
-                message = '{}: {}'.format(nickname, input(''))
-                self.already_sent = True
+                message = self.msg+"a"
                 client.send(message.encode('ascii'))
+                self.already_sent = True
             else:
                 pass
 
