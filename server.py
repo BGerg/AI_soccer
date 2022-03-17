@@ -10,7 +10,6 @@ server.bind((host, port))                                               #binding
 server.listen()
 
 clients = []
-nicknames = []
 teams = {}
 
 def broadcast(message):
@@ -32,9 +31,7 @@ def handle(client):
             index = clients.index(client)
             clients.remove(client)
             client.close()
-            nickname = nicknames[index]
-            broadcast('{} left!'.format(nickname).encode('ascii'))
-            nicknames.remove(nickname)
+
             break
 
 def receive():
