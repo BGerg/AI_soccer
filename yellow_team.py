@@ -13,13 +13,9 @@ class ClientHandle:
     def receive(self):
         while True:  # making valid connection
             try:
-                message = client.recv(1024).decode('ascii')
+                self.msg = client.recv(1024).decode('ascii')
                 self.already_sent = False
-                if message == 'NICKNAME':
-                    client.send(nickname.encode('ascii'))
-                else:
-                    self.msg = message
-                    print(message)
+                print(self.msg)
             except Exception as e:  # case on wrong ip/port details
                 print(f"An error occured! {e}")
                 client.close()
@@ -28,8 +24,8 @@ class ClientHandle:
     def write(self):
         while True:  # message layout
             if not self.already_sent:
-                message = self.msg+"a"
-                client.send(message.encode('ascii'))
+                self.msg = self.msg+"a"
+                client.send(self.msg.encode('ascii'))
                 self.already_sent = True
             else:
                 pass

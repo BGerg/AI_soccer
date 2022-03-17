@@ -12,6 +12,7 @@ server.listen()
 clients = []
 nicknames = []
 teams = {}
+
 def broadcast(message):
     for client in clients:
         client.send(message)
@@ -40,22 +41,17 @@ def receive():
     while True:
         client, address = server.accept()
         print("Connected with {}".format(str(address)))
-        client.send('NICKNAME'.encode('ascii'))
-        nickname = client.recv(1024).decode('ascii')
-        nicknames.append(nickname)
         clients.append(client)
-        if nickname == "blue_team":
-            teams["blue_team"] = client
-        elif nickname == "yellow_team":
+        if "blue_team" in teams:
             teams["yellow_team"] = client
-        print("Nickname is {}".format(nickname))
+        else:
+            teams["blue_team"] = client
         if len(clients) == 2:
             #broadcast("{} joined!".format(nickname).encode('ascii'))
             #broadcast('Connected to server!'.encode('ascii'))
             for client in clients:
                 thread = threading.Thread(target=handle, args=(client,))
                 thread.start()
-        elif len(clients) == 1:
-            client.send('Waiting for other player to join...'.encode('ascii'))
+
 
 receive()
