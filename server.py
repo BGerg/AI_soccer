@@ -1,4 +1,5 @@
 #Coded by Yashraj Singh Chouhan
+import json
 import socket, threading                                                #Libraries import
 import time
 
@@ -16,24 +17,25 @@ def broadcast(message):
     for client in clients:
         client.send(message)
 
+
 def handle(client):
+    seresr = 0
     while True:
         #time.sleep(1)
-        try:                                                            #recieving valid messages from client
-            message = client.recv(1024)
-            print(message)
-            if client == teams["blue_team"]:
-                receiver = teams["yellow_team"]
-                receiver.send(message)
-            if client == teams["yellow_team"]:
-                receiver = teams["blue_team"]
-                receiver.send(message)
-        except:                                                         #removing clients
-            index = clients.index(client)
-            clients.remove(client)
-            client.close()
 
-            break
+
+        message = client.recv(5000)
+        if message != b'':
+
+
+            print(f"{json.loads(message)}\n")
+        #if client == teams["blue_team"]:
+         #   receiver = teams["yellow_team"]
+         #   receiver.send(message)
+        #if client == teams["yellow_team"]:
+         #   receiver = teams["blue_team"]
+         #   receiver.send(message)
+
 
 def receive():
     while True:
@@ -44,12 +46,13 @@ def receive():
             teams["yellow_team"] = client
         else:
             teams["blue_team"] = client
-        if len(clients) == 2:
+        #if len(clients) == 2:
             #broadcast("{} joined!".format(nickname).encode('ascii'))
             #broadcast('Connected to server!'.encode('ascii'))
-            for client in clients:
-                thread = threading.Thread(target=handle, args=(client,))
-                thread.start()
-
+            #for client in clients:
+             #   thread = threading.Thread(target=handle, args=(client,))
+            #    thread.start()
+        handle(clients[0])
+            #handle(clients[1])
 
 receive()
