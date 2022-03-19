@@ -13,46 +13,68 @@ server.listen()
 clients = []
 teams = {}
 
-def broadcast(message):
-    for client in clients:
-        client.send(message)
 
+blue_one = {"id": 1, "color": "blue", "position_x": 123,"position_y": 123, "ball": "False"}
+blue_two = {"id": 1, "color": "blue", "position_x": 123,"position_y": 123, "ball": "False"}
+blue_three = {"id": 1, "color": "blue", "position_x": 123,"position_y": 123, "ball": "False"}
+blue_four = {"id": 1, "color": "blue", "position_x": 123,"position_y": 123, "ball": "False"}
+blue_five = {"id": 1, "color": "blue", "position_x": 123,"position_y": 123, "ball": "False"}
+blue_goalkeeper = {"id": 1, "color": "blue", "position_x": 123,"position_y": 123, "ball": "False"}
+
+yellow_one = {"id": 1, "color": "blue", "position_x": 123,"position_y": 123, "ball": "False"}
+yellow_two = {"id": 1, "color": "blue", "position_x": 123,"position_y": 123, "ball": "False"}
+yellow_three = {"id": 1, "color": "blue", "position_x": 123,"position_y": 123, "ball": "False"}
+yellow_four = {"id": 1, "color": "blue", "position_x": 123,"position_y": 123, "ball": "False"}
+yellow_five = {"id": 1, "color": "blue", "position_x": 123,"position_y": 123, "ball": "False"}
+yellow_goalkeeper = {"id": 1, "color": "blue", "position_x": 123,"position_y": 123, "ball": "False"}
+
+blue_team = {"blue_one": blue_one, "blue_two": blue_two, "blue_three": blue_three, "blue_four": blue_four, "blue_five": blue_five, "blue_goalkeeper":blue_goalkeeper }
+
+yellow_team = {"yellow_one": yellow_one, "yellow_two": yellow_two, "yellow_three": yellow_three, "yellow_four": yellow_four, "yellow_five": yellow_five, "yellow_goalkeeper":yellow_goalkeeper}
+
+
+ball = {"position_x": 123, "position_y": 123}
+
+blue_gate = {"position_x": 123, "position_y": 123, "ball": False}
+yellow_gate = {"position_x": 123, "position_y": 123, "ball": False}
+goal_area_yellow = {"position_x": 123, "position_y": 123, "ball": False}
+goal_area_blue = {"position_x": 123, "position_y": 123, "ball": False}
+
+data = {"yellow_team":yellow_team, "blue_team": blue_team, "blue_gate":blue_gate, "yellow_gate":yellow_gate, "goal_area_yellow": goal_area_yellow,"goal_area_blue":goal_area_blue }
 
 def handle(client):
     seresr = 0
+    first = True
     while True:
         #time.sleep(1)
+        if first:
+            a = data
+            a = json.dumps(a)
+            a = bytes(a, 'UTF-8')
+            client[0].send(a)
+            first = False
 
+        message = client[0].recv(5000)
 
-        message = client.recv(5000)
-        if message != b'':
+        decoded = json.loads(message)
+        print(f"{decoded}\n")
+        a = json.dumps(decoded)
+        a = bytes(a, 'UTF-8')
+        client[1].send(a)
 
-
-            print(f"{json.loads(message)}\n")
-        #if client == teams["blue_team"]:
-         #   receiver = teams["yellow_team"]
-         #   receiver.send(message)
-        #if client == teams["yellow_team"]:
-         #   receiver = teams["blue_team"]
-         #   receiver.send(message)
-
+        message = client[1].recv(5000)
+        decoded = json.loads(message)
+        print(f"{decoded}\n")
+        a = json.dumps(decoded)
+        a = bytes(a, 'UTF-8')
+        client[0].send(a)
 
 def receive():
     while True:
         client, address = server.accept()
         print("Connected with {}".format(str(address)))
         clients.append(client)
-        if "blue_team" in teams:
-            teams["yellow_team"] = client
-        else:
-            teams["blue_team"] = client
-        #if len(clients) == 2:
-            #broadcast("{} joined!".format(nickname).encode('ascii'))
-            #broadcast('Connected to server!'.encode('ascii'))
-            #for client in clients:
-             #   thread = threading.Thread(target=handle, args=(client,))
-            #    thread.start()
-        handle(clients[0])
-            #handle(clients[1])
+        if len(clients) == 2:
+            handle(clients)
 
 receive()

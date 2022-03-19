@@ -1,4 +1,6 @@
 # Import the pygame module
+import json
+import socket
 import time
 
 import pygame
@@ -263,6 +265,7 @@ def catch_ball_first(player_w_ball):
         blue_one.move_to((pos_x_to_blue, pos_y_to_blue ))
         yellow_one.move_to((pos_x_to_yellow, pos_y_to_yellow ))
 
+def conversion_data_to_dict(input):
 # Initialize pygame
 pygame.init()
 
@@ -391,60 +394,104 @@ def reset():
 # Variable to keep the main loop running
 running = True
 
+host = '127.0.0.1'                                                      #LocalHost
+port = 7976                                                             #Choosing unreserved port
 
-# Main loop
-while running:
-    # for loop through the event queue
-    for event in pygame.event.get():
-        # Check for KEYDOWN event
-        if event.type == KEYDOWN:
-            # If the Esc key is pressed, then exit the main loop
-            if event.key == K_ESCAPE:
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)              #socket initialization
+server.bind((host, port))                                               #binding host and port to socket
+server.listen()
+first = True
+
+def handle(client, data):
+    global first
+    if first:
+        a = data
+        a = json.dumps(a)
+        a = bytes(a, 'UTF-8')
+        client[0].send(a)
+        first = False
+
+    message = client[0].recv(5000)
+
+    decoded = json.loads(message)
+    print(f"{decoded}\n")
+    a = json.dumps(decoded)
+    a = bytes(a, 'UTF-8')
+    client[1].send(a)
+
+    message = client[1].recv(5000)
+    decoded = json.loads(message)
+    print(f"{decoded}\n")
+    a = json.dumps(decoded)
+    a = bytes(a, 'UTF-8')
+    client[0].send(a)
+
+clients = []
+
+
+def main():
+    # Main loop
+    while running:
+        # for loop through the event queue
+        for event in pygame.event.get():
+            # Check for KEYDOWN event
+            if event.type == KEYDOWN:
+                # If the Esc key is pressed, then exit the main loop
+                if event.key == K_ESCAPE:
+                    running = False
+            # Check for QUIT event. If QUIT, then set running to false.
+            elif event.type == QUIT:
                 running = False
-        # Check for QUIT event. If QUIT, then set running to false.
-        elif event.type == QUIT:
-            running = False
 
-    screen.blit(background_image, [0, 0])
-    screen.blit(new_ball.surf, new_ball.rect)
+        screen.blit(background_image, [0, 0])
+        screen.blit(new_ball.surf, new_ball.rect)
 
-    for entity in all_sprites:
-        screen.blit(entity.surf, entity.rect)
-    for entity in goal_areas:
-        screen.blit(entity.surf, entity.rect)
+        for entity in all_sprites:
+            screen.blit(entity.surf, entity.rect)
+        for entity in goal_areas:
+            screen.blit(entity.surf, entity.rect)
 
 
-    player_w_ball, team_wo_ball, team_w_ball = who_has_ball(all_players,yellow_team, blue_team, blue_gate)
-    catch_ball_first(player_w_ball)
-    check_goal(team_w_ball)
+        player_w_ball, team_wo_ball, team_w_ball = who_has_ball(all_players,yellow_team, blue_team, blue_gate)
+        catch_ball_first(player_w_ball)
+        check_goal(team_w_ball)
 
-    if player_w_ball:
-        handle_players_collision(player_w_ball, team_wo_ball, team_w_ball)
-        closest_player = get_closest_player(team_wo_ball, player_w_ball)
-        n = random.randint(10,30)
-        pos_x = (player_w_ball.rect[0] - closest_player.rect[0])/n
-        pos_y = (player_w_ball.rect[1] - closest_player.rect[1])/n
-        closest_player.move_to((pos_x,pos_y))
-        move_players_to_enemy_gate(blue_team, yellow_team, blue_gate, yellow_gate, team_w_ball)
+        if player_w_ball:
+            handle_players_collision(player_w_ball, team_wo_ball, team_w_ball)
+            closest_player = get_closest_player(team_wo_ball, player_w_ball)
+            n = random.randint(10,30)
+            pos_x = (player_w_ball.rect[0] - closest_player.rect[0])/n
+            pos_y = (player_w_ball.rect[1] - closest_player.rect[1])/n
+            closest_player.move_to((pos_x,pos_y))
+            move_players_to_enemy_gate(blue_team, yellow_team, blue_gate, yellow_gate, team_w_ball)
 
 
 
-    if pygame.sprite.spritecollideany(yellow_one, ball):
-        # If so, then remove the player and stop the loop
-        yellow_one.ball = True
-        yellow_one.has_ball()
-        new_ball.hide_ball()
-        new_ball.remove(ball)
+        if pygame.sprite.spritecollideany(yellow_one, ball):
+            # If so, then remove the player and stop the loop
+            yellow_one.ball = True
+            yellow_one.has_ball()
+            new_ball.hide_ball()
+            new_ball.remove(ball)
 
-    # Check if any ball have collided with the player
-    if pygame.sprite.spritecollideany(blue_one, ball):
-        # If so, then remove the player and stop the loop
-        yellow_one.ball = True
-        yellow_one.has_ball()
-        new_ball.hide_ball()
-        new_ball.remove(ball)
+        # Check if any ball have collided with the player
+        if pygame.sprite.spritecollideany(blue_one, ball):
+            # If so, then remove the player and stop the loop
+            yellow_one.ball = True
+            yellow_one.has_ball()
+            new_ball.hide_ball()
+            new_ball.remove(ball)
 
-    # Update the display
-    pygame.display.flip()
-    # Ensure program maintains a rate of 30 frames per second
-    clock.tick(30)
+        # Update the display
+        pygame.display.flip()
+        # Ensure program maintains a rate of 30 frames per second
+        clock.tick(30)
+
+        handle(clients, data)
+
+while True:
+    client, address = server.accept()
+    print("Connected with {}".format(str(address)))
+    clients.append(client)
+    if len(clients) == 2:
+        main()
