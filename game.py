@@ -9,10 +9,6 @@ import random
 # Updated to conform to flake8 and black standards
 from pygame.locals import (
     RLEACCEL,
-    K_UP,
-    K_DOWN,
-    K_LEFT,
-    K_RIGHT,
     K_ESCAPE,
     KEYDOWN,
     QUIT,
@@ -36,38 +32,6 @@ class Player(pygame.sprite.Sprite):
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = pygame.Rect(player_posx, player_posy, 44, 77)
         self.ball = False
-
-
-    # Move the sprite based on user keypresses
-    def update(self, pressed_keys):
-        direction = ()
-        if pressed_keys[K_UP]:
-            direction = (0, -5)
-            self.rect.move_ip(direction)
-            #move_up_sound.play()
-        if pressed_keys[K_DOWN]:
-            direction = (0, 5)
-            self.rect.move_ip(direction)
-            #move_down_sound.play()
-        if pressed_keys[K_LEFT]:
-            direction = (-5, 0)
-            self.rect.move_ip(direction)
-        if pressed_keys[K_RIGHT]:
-            direction = (5, 0)
-            self.rect.move_ip(direction)
-
-        # Keep player on the screen
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > SCREEN_WIDTH:
-            self.rect.right = SCREEN_WIDTH
-        if self.rect.top <= 0:
-            self.rect.top = 0
-        if self.rect.bottom >= SCREEN_HEIGHT:
-            self.rect.bottom = SCREEN_HEIGHT
-
-    def move_to(self, position):
-        self.rect.move_ip(position)
 
     def has_ball(self):
         if self.color == "yellow" and self.ball == False:
@@ -98,9 +62,9 @@ class PlayerGoalKeeper(pygame.sprite.Sprite):
         elif self.color == "blue" and self.ball == False:
             self.surf = pygame.image.load("images/goolkeeper_1.png").convert()
         elif self.color == "yellow" and self.ball:
-            self.surf = pygame.image.load("images/goolkeeper_goal_1.png").convert()
-        elif self.color == "blue" and self.ball:
             self.surf = pygame.image.load("images/goolkeeper_goal_2.png").convert()
+        elif self.color == "blue" and self.ball:
+            self.surf = pygame.image.load("images/goolkeeper_goal_1.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
 
@@ -286,22 +250,6 @@ def reset():
     new_ball.add(ball)
     new_ball.unhide_ball()
 
-# def get_closest_player(team, player_w_ball):
-#     closest_player = ""
-#     tmp_distance = 0
-#     dist = 999999999999999999999999999
-#     for player in team:
-#         if player != player_w_ball:
-#             tmp_distance = distance.euclidean([player_w_ball.rect[0],player_w_ball.rect[1]],
-#                                               [player.rect[0],player.rect[1]])
-#         else:
-#             continue
-#         if tmp_distance < dist:
-#             dist = tmp_distance
-#             closest_player = player
-#
-#     return closest_player
-
 def get_random_other_player_his_team(team):
     return random.choice(list(team))
 
@@ -310,10 +258,8 @@ def handle_players_collision(player_w_ball, team_wo_ball, team_w_ball):
     action_number = random.randint(0, 2)
     for player_wo_ball in team_wo_ball:
         if pygame.sprite.collide_rect(player_w_ball, player_wo_ball):
-            fg = all_data
             if action_number == 1:
                 teammate = get_random_other_player_his_team(team_w_ball)
-                #closest_player = get_closest_player(team_w_ball, player_w_ball)
                 player_w_ball.ball = False
                 teammate.ball = True
                 teammate.has_ball()
@@ -342,23 +288,6 @@ def who_has_ball(all_players, yellow_team, blue_team):
 
     return player_w_ball, team_wo_ball, team_w_ball
 
-# def move_players_to_enemy_gate(b_team, y_team, b_gate, y_gate, team_ball):
-#     for player in y_team:
-#         if player in team_ball:
-#             a = "1" + (len(str(abs(player.rect[0] - b_gate.rect[0])))-1)*"0"
-#             b = "1" + (len(str(abs(player.rect[1] - b_gate.rect[1])))-1)*"0"
-#             pos_x = (b_gate.rect[0]- player.rect[0]) / (int(a)+10)
-#             pos_y = (b_gate.rect[1]- player.rect[1]) / (int(b)+10)
-#             player.move_to((pos_x, pos_y))
-#     for player in b_team:
-#         if player in team_ball:
-#             a = "1" + (len(str(abs(player.rect[0] - y_gate.rect[0])))-1)*"0"
-#             b = "1" + (len(str(abs(player.rect[1] - y_gate.rect[1])))-1)*"0"
-#             pos_x = (y_gate.rect[0]- player.rect[0]) / (int(a)+10)
-#             pos_y = (y_gate.rect[1]- player.rect[1]) / (int(b)+10)
-#             player.move_to((pos_x, pos_y))
-
-
 def check_goal(team_w_ball):
     for player in team_w_ball:
         if player.color == "yellow":
@@ -382,15 +311,6 @@ def check_goal(team_w_ball):
 
             reset()
 
-# def catch_ball_first(player_w_ball):
-#     if not player_w_ball:
-#         n = random.randint(10,70)
-#         pos_x_to_blue = (new_ball.rect[0] - blue_one.rect[0])/n
-#         pos_y_to_blue = (new_ball.rect[1] - blue_one.rect[1])/n
-#         pos_x_to_yellow = (new_ball.rect[0] - yellow_one.rect[0])/n
-#         pos_y_to_yellow = (new_ball.rect[1] - yellow_one.rect[1])/n
-#         blue_one.move_to((pos_x_to_blue, pos_y_to_blue ))
-#         yellow_one.move_to((pos_x_to_yellow, pos_y_to_yellow ))
 
 def conversion_data_to_dict(blue_team, yellow_team, ball, yellow_goalarea,
                             blue_goalarea, blue_gate, yellow_gate,
@@ -534,12 +454,7 @@ def main():
         check_goal(team_w_ball)
         if player_w_ball:
             handle_players_collision(player_w_ball, team_wo_ball, team_w_ball)
-            # closest_player = get_closest_player(team_wo_ball, player_w_ball)
-            # n = random.randint(10,30)
-            # pos_x = (player_w_ball.rect[0] - closest_player.rect[0])/n
-            # pos_y = (player_w_ball.rect[1] - closest_player.rect[1])/n
-            # closest_player.move_to((pos_x,pos_y))
-            # move_players_to_enemy_gate(blue_team, yellow_team, blue_gate, yellow_gate, team_w_ball)
+
 
         if pygame.sprite.spritecollideany(yellow_one, ball):
             # If so, then remove the player and stop the loop
@@ -561,7 +476,7 @@ def main():
             # Update the display
         pygame.display.flip()
         # Ensure program maintains a rate of 30 frames per second
-        clock.tick(25)
+        clock.tick(20)
 
 while True:
     client, address = server.accept()
