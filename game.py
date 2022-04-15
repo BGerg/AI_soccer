@@ -125,11 +125,11 @@ class Ball(pygame.sprite.Sprite):
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
 class SoccerGate(pygame.sprite.Sprite):
-    def __init__(self,position_x, position_y):
+    def __init__(self,pos_x, pos_y):
         super(SoccerGate, self).__init__()
         self.surf = pygame.image.load("images/soccergate.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
-        self.rect = pygame.Rect(position_x, position_y, 50, 150)
+        self.rect = pygame.Rect(pos_x, pos_y, 50, 150)
         self.ball = False
 
     def has_ball(self, has):
@@ -395,17 +395,17 @@ def conversion_data_to_dict(blue_team, yellow_team, ball, yellow_goalarea,
     global all_data
 
     player_with_ball = get_player_with_ball_to_dict(player_w_ball)
-    ball_dict = {"position_x": ball.rect[0],
-                         "position_y": ball.rect[1]}
-    blue_goalarea_dict = {"position_x": blue_goalarea.rect[0],
-                          "position_y": blue_goalarea.rect[1]}
-    yellow_goalarea_dict = {"position_x": yellow_goalarea.rect[0],
-                          "position_y": yellow_goalarea.rect[1]}
-    blue_gate_dict = {"position_x": blue_gate.rect[0],
-                       "position_y": blue_gate.rect[1],
+    ball_dict = {"pos_x": ball.rect[0],
+                         "pos_y": ball.rect[1]}
+    blue_goalarea_dict = {"pos_x": blue_goalarea.rect[0],
+                          "pos_y": blue_goalarea.rect[1]}
+    yellow_goalarea_dict = {"pos_x": yellow_goalarea.rect[0],
+                          "pos_y": yellow_goalarea.rect[1]}
+    blue_gate_dict = {"pos_x": blue_gate.rect[0],
+                       "pos_y": blue_gate.rect[1],
                        "ball": blue_gate.ball}
-    yellow_gate_dict = {"position_x": yellow_gate.rect[0],
-                       "position_y": yellow_gate.rect[1],
+    yellow_gate_dict = {"pos_x": yellow_gate.rect[0],
+                       "pos_y": yellow_gate.rect[1],
                        "ball": yellow_gate.ball}
 
     yellow_team_dict = create_dict_from_team_sprite(yellow_team)
@@ -423,14 +423,15 @@ def get_player_with_ball_to_dict(player_w_ball):
         player_with_ball["role"] = player_w_ball.role
         player_with_ball["color"] = player_w_ball.color
         player_with_ball["ball"] = player_w_ball.ball
-        player_with_ball["position_x"] = player_w_ball.rect[0]
-        player_with_ball["position_y"] = player_w_ball.rect[1]
+        player_with_ball["pos_x"] = player_w_ball.rect[0]
+        player_with_ball["pos_y"] = player_w_ball.rect[1]
     else:
         player_with_ball["name"] = None
+        player_with_ball["role"] = None
         player_with_ball["color"] = None
         player_with_ball["ball"] = None
-        player_with_ball["position_x"] = None
-        player_with_ball["position_y"] = None
+        player_with_ball["pos_x"] = None
+        player_with_ball["pos_y"] = None
 
     return player_with_ball
 
@@ -439,11 +440,12 @@ def create_dict_from_team_sprite(team):
     for player in team:
         player_dict = {}
         id = player.name
+        player_dict["name"] = player.name
         player_dict["role"] = player.role
         player_dict["color"] = player.color
         player_dict["ball"] = player.ball
-        player_dict["position_x"] = player.rect[0]
-        player_dict["position_y"] = player.rect[1]
+        player_dict["pos_x"] = player.rect[0]
+        player_dict["pos_y"] = player.rect[1]
         team_dict[id] = player_dict
 
     return team_dict
@@ -452,8 +454,8 @@ def create_dict_from_team_sprite(team):
 
 def update_team_states(team, team_color):
     for player, player_dict in zip(team, all_data[team_color]):
-        player.rect[0] = all_data[team_color][player_dict]["position_x"]
-        player.rect[1] = all_data[team_color][player_dict]["position_y"]
+        player.rect[0] = all_data[team_color][player_dict]["pos_x"]
+        player.rect[1] = all_data[team_color][player_dict]["pos_y"]
         player.ball = all_data[team_color][player_dict]["ball"]
 
 # Variable to keep the main loop running
