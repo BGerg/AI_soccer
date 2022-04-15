@@ -9,10 +9,6 @@ import random
 # Updated to conform to flake8 and black standards
 from pygame.locals import (
     RLEACCEL,
-    K_UP,
-    K_DOWN,
-    K_LEFT,
-    K_RIGHT,
     K_ESCAPE,
     KEYDOWN,
     QUIT,
@@ -24,89 +20,89 @@ SCREEN_WIDTH = int(1.869*SCREEN_HEIGHT)
 all_data = {}
 # Define a player object by extending pygame.sprite.Sprite
 # The surface drawn on the screen is now an attribute of 'player'
-class Player(pygame.sprite.Sprite):
-    def __init__(self, name, color, player_posx, player_posy):
-        super(Player, self).__init__()
-        self.color = color
+class PlayerBlue(pygame.sprite.Sprite):
+    def __init__(self, name, role):
+        super(PlayerBlue, self).__init__()
         self.name = name
-        if self.color == "blue":
-            self.surf = pygame.image.load("images/player_blue.png").convert()
-        elif self.color == "yellow":
-            self.surf = pygame.image.load("images/player_yellow.png").convert()
-        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
-        self.rect = pygame.Rect(player_posx, player_posy, 44, 77)
+        self.role = "simple"
+        self.color = "blue"
         self.ball = False
 
-
-    # Move the sprite based on user keypresses
-    def update(self, pressed_keys):
-        direction = ()
-        if pressed_keys[K_UP]:
-            direction = (0, -5)
-            self.rect.move_ip(direction)
-            #move_up_sound.play()
-        if pressed_keys[K_DOWN]:
-            direction = (0, 5)
-            self.rect.move_ip(direction)
-            #move_down_sound.play()
-        if pressed_keys[K_LEFT]:
-            direction = (-5, 0)
-            self.rect.move_ip(direction)
-        if pressed_keys[K_RIGHT]:
-            direction = (5, 0)
-            self.rect.move_ip(direction)
-
-        # Keep player on the screen
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > SCREEN_WIDTH:
-            self.rect.right = SCREEN_WIDTH
-        if self.rect.top <= 0:
-            self.rect.top = 0
-        if self.rect.bottom >= SCREEN_HEIGHT:
-            self.rect.bottom = SCREEN_HEIGHT
-
-    def move_to(self, position):
-        self.rect.move_ip(position)
+    def set_position(self, pos_x, pos_y):
+        self.rect = pygame.Rect(pos_x, pos_y, 44, 77)
 
     def has_ball(self):
-        if self.color == "yellow" and self.ball == False:
-            self.surf = pygame.image.load("images/player_yellow.png").convert()
-        elif self.color == "blue" and self.ball == False:
+        if not self.ball:
             self.surf = pygame.image.load("images/player_blue.png").convert()
-        elif self.color == "yellow" and self.ball:
-            self.surf = pygame.image.load("images/player_yellow_w_ball.png").convert()
-        elif self.color == "blue" and self.ball:
+        elif self.ball:
             self.surf = pygame.image.load("images/player_blue_w_ball.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
-class PlayerGoalKeeper(pygame.sprite.Sprite):
-    def __init__(self,color, player_posx, player_posy):
-        super(PlayerGoalKeeper, self).__init__()
-        self.color = color
-        if self.color == "blue":
-            self.surf = pygame.image.load("images/goolkeeper_1.png").convert()
-        elif self.color == "yellow":
-            self.surf = pygame.image.load("images/goolkeeper_2.png").convert()
-        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
-        self.rect = pygame.Rect(player_posx, player_posy, 44, 77)
+class PlayerYellow(pygame.sprite.Sprite):
+    def __init__(self, name, role):
+        super(PlayerYellow, self).__init__()
+        self.name = name
+        self.role = "simple"
+        self.color = "yellow"
         self.ball = False
 
+    def set_position(self, pos_x, pos_y):
+        self.rect = pygame.Rect(pos_x, pos_y, 44, 77)
+
     def has_ball(self):
-        if self.color == "yellow" and self.ball == False:
-            self.surf = pygame.image.load("images/goolkeeper_2.png").convert()
-        elif self.color == "blue" and self.ball == False:
-            self.surf = pygame.image.load("images/goolkeeper_1.png").convert()
-        elif self.color == "yellow" and self.ball:
-            self.surf = pygame.image.load("images/goolkeeper_goal_1.png").convert()
-        elif self.color == "blue" and self.ball:
-            self.surf = pygame.image.load("images/goolkeeper_goal_2.png").convert()
+        if not self.ball:
+            self.surf = pygame.image.load("images/player_yellow.png").convert()
+        elif self.ball:
+            self.surf = pygame.image.load("images/player_yellow_w_ball.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
+class BlueGoalKeeper(pygame.sprite.Sprite):
+    def __init__(self, name, role):
+        super(BlueGoalKeeper, self).__init__()
+        self.name = name
+        self.role = "goalkeeper"
+        self.color = "blue"
+        self.ball = False
+
+    def set_position(self, pos_x, pos_y):
+        self.rect = pygame.Rect(pos_x, pos_y, 44, 77)
+
+    def has_ball(self):
+        if not self.ball:
+            self.surf = pygame.image.load("images/goolkeeper_1.png").convert()
+        elif self.ball:
+            self.surf = pygame.image.load("images/goolkeeper_goal_1.png").convert()
+        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
+
+class YellowGoalKeeper(pygame.sprite.Sprite):
+    def __init__(self, name, role):
+        super(YellowGoalKeeper, self).__init__()
+        self.name = name
+        self.role = "goalkeeper"
+        self.color = "yellow"
+        self.ball = False
+
+    def set_position(self, pos_x, pos_y):
+        self.rect = pygame.Rect(pos_x, pos_y, 44, 77)
+
+    def has_ball(self):
+        if not self.ball:
+            self.surf = pygame.image.load("images/goolkeeper_2.png").convert()
+        elif self.ball:
+            self.surf = pygame.image.load("images/goolkeeper_goal_2.png").convert()
+        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
 # Define the ball object by extending pygame.sprite.Sprite
 # The surface you draw on the screen is now an attribute of 'ball'
 class Ball(pygame.sprite.Sprite):
+    _instance = None
+    def __new__(cls):
+        if cls._instance is None:
+            print('Creating the object')
+            cls._instance = super(Ball, cls).__new__(cls)
+            # Put any initialization here.
+        return cls._instance
+
     def __init__(self):
         super(Ball, self).__init__()
         self.surf = pygame.image.load("images/ball.png").convert()
@@ -129,11 +125,11 @@ class Ball(pygame.sprite.Sprite):
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
 class SoccerGate(pygame.sprite.Sprite):
-    def __init__(self,position_x, position_y):
+    def __init__(self,pos_x, pos_y):
         super(SoccerGate, self).__init__()
         self.surf = pygame.image.load("images/soccergate.png").convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
-        self.rect = pygame.Rect(position_x, position_y, 50, 150)
+        self.rect = pygame.Rect(pos_x, pos_y, 50, 150)
         self.ball = False
 
     def has_ball(self, has):
@@ -159,6 +155,28 @@ class GoalAreaYellow(pygame.sprite.Sprite):
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = pygame.Rect(50, SCREEN_HEIGHT/2-325/2, 162, 325)
 
+class PlayerFactory():
+    def create_player(self, color, role, name):
+        if color == "blue" and role == "simple":
+            player = PlayerBlue(name, role)
+        elif color == "blue" and role == "goalkeeper":
+            player = BlueGoalKeeper(name, role)
+        elif color == "yellow" and role == "simple":
+            player = PlayerYellow(name, role)
+        elif color == "yellow" and role =="goalkeeper":
+            player = YellowGoalKeeper(name, role)
+        return player
+
+class PlayerCreator():
+    def __init__(self, factory):
+        self.factory = factory
+
+    def get_player(self, color, role, name, pos_x, pos_y):
+        factory = self.factory
+        player = factory.create_player(color, role, name)
+        player.set_position(pos_x, pos_y)
+        player.has_ball()
+        return player
 
 # Initialize pygame
 pygame.init()
@@ -171,22 +189,44 @@ background_image = pygame.image.load("images/soccer_field.jpeg").convert()
 ADDBALL = pygame.USEREVENT + 1
 pygame.time.set_timer(ADDBALL, 250)
 
+creator = PlayerCreator(PlayerFactory())
 
+yellow_players_data = [["yellow", "simple", "yellow_one", 440, 240],
+                       ["yellow", "simple", "yellow_two", 390, 375],
+                       ["yellow", "simple", "yellow_three", 390, 95],
+                       ["yellow", "simple", "yellow_four", 255, 130],
+                       ["yellow", "simple", "yellow_five", 255, 330],
+                       ["yellow", "goalkeeper", "yellow_goalkeeper",50, 240]]
+
+blue_players_data = [["blue", "simple", "blue_one", 615, 240],
+                     ["blue", "simple", "blue_two", 670, 100],
+                     ["blue", "simple",  "blue_three", 670, 375],
+                     ["blue", "simple", "blue_four", 805, 130],
+                     ["blue", "simple", "blue_five", 805, 330],
+                     ["blue", "goalkeeper", "blue_goalkeeper", 1005, 240]]
+
+yellow_players = []
+for player_data in yellow_players_data:
+    yellow_players.append(creator.get_player(*player_data))
+
+blue_players = []
+for player_data in blue_players_data:
+    blue_players.append(creator.get_player(*player_data))
 
 # Instantiate player. Right now, this is just a rectangle.
-yellow_one = Player("yellow_one", "yellow", 440, 240)
-yellow_two = Player("yellow_two","yellow", 390, 375)
-yellow_three = Player("yellow_three","yellow", 390, 95)
-yellow_four = Player("yellow_four","yellow", 255, 130)
-yellow_five = Player("yellow_five","yellow", 255, 330)
-yellow_goalkeeper = PlayerGoalKeeper("yellow",50, 240)
+yellow_one = yellow_players[0]
+yellow_two = yellow_players[1]
+yellow_three = yellow_players[2]
+yellow_four = yellow_players[3]
+yellow_five = yellow_players[4]
+yellow_goalkeeper = yellow_players[5]
 
-blue_one = Player("blue_one","blue", 615, 240)
-blue_two = Player("blue_two","blue", 670, 100)
-blue_three = Player("blue_three","blue", 670, 375)
-blue_four = Player("blue_four","blue", 805, 130)
-blue_five = Player("blue_five","blue", 805, 330)
-blue_goalkeeper = PlayerGoalKeeper("blue", 1005, 240)
+blue_one = blue_players[0]
+blue_two = blue_players[1]
+blue_three = blue_players[2]
+blue_four = blue_players[3]
+blue_five = blue_players[4]
+blue_goalkeeper = blue_players[5]
 
 new_ball = Ball()
 blue_gate = SoccerGate(SCREEN_WIDTH-50, SCREEN_HEIGHT/2-150/2)
@@ -205,18 +245,13 @@ all_players = pygame.sprite.Group()
 soccer_gates = pygame.sprite.Group()
 goal_areas = pygame.sprite.Group()
 
-yellow_team.add(yellow_one)
-yellow_team.add(yellow_two)
-yellow_team.add(yellow_three)
-yellow_team.add(yellow_four)
-yellow_team.add(yellow_five)
+for player_y in yellow_players:
+    yellow_team.add(player_y)
 
 
-blue_team.add(blue_one)
-blue_team.add(blue_two)
-blue_team.add(blue_three)
-blue_team.add(blue_four)
-blue_team.add(blue_five)
+for player_b in blue_players:
+    blue_team.add(player_b)
+
 
 
 ball.add(new_ball)
@@ -286,34 +321,22 @@ def reset():
     new_ball.add(ball)
     new_ball.unhide_ball()
 
-# def get_closest_player(team, player_w_ball):
-#     closest_player = ""
-#     tmp_distance = 0
-#     dist = 999999999999999999999999999
-#     for player in team:
-#         if player != player_w_ball:
-#             tmp_distance = distance.euclidean([player_w_ball.rect[0],player_w_ball.rect[1]],
-#                                               [player.rect[0],player.rect[1]])
-#         else:
-#             continue
-#         if tmp_distance < dist:
-#             dist = tmp_distance
-#             closest_player = player
-#
-#     return closest_player
-
 def get_random_other_player_his_team(team):
-    return random.choice(list(team))
+    player_is_goalkeeper = True
+    player = ""
+    while player_is_goalkeeper:
+        player = random.choice(list(team))
+        if player.role == "simple":
+            player_is_goalkeeper = False
+    return player
 
 
 def handle_players_collision(player_w_ball, team_wo_ball, team_w_ball):
     action_number = random.randint(0, 2)
     for player_wo_ball in team_wo_ball:
         if pygame.sprite.collide_rect(player_w_ball, player_wo_ball):
-            fg = all_data
             if action_number == 1:
                 teammate = get_random_other_player_his_team(team_w_ball)
-                #closest_player = get_closest_player(team_w_ball, player_w_ball)
                 player_w_ball.ball = False
                 teammate.ball = True
                 teammate.has_ball()
@@ -342,23 +365,6 @@ def who_has_ball(all_players, yellow_team, blue_team):
 
     return player_w_ball, team_wo_ball, team_w_ball
 
-# def move_players_to_enemy_gate(b_team, y_team, b_gate, y_gate, team_ball):
-#     for player in y_team:
-#         if player in team_ball:
-#             a = "1" + (len(str(abs(player.rect[0] - b_gate.rect[0])))-1)*"0"
-#             b = "1" + (len(str(abs(player.rect[1] - b_gate.rect[1])))-1)*"0"
-#             pos_x = (b_gate.rect[0]- player.rect[0]) / (int(a)+10)
-#             pos_y = (b_gate.rect[1]- player.rect[1]) / (int(b)+10)
-#             player.move_to((pos_x, pos_y))
-#     for player in b_team:
-#         if player in team_ball:
-#             a = "1" + (len(str(abs(player.rect[0] - y_gate.rect[0])))-1)*"0"
-#             b = "1" + (len(str(abs(player.rect[1] - y_gate.rect[1])))-1)*"0"
-#             pos_x = (y_gate.rect[0]- player.rect[0]) / (int(a)+10)
-#             pos_y = (y_gate.rect[1]- player.rect[1]) / (int(b)+10)
-#             player.move_to((pos_x, pos_y))
-
-
 def check_goal(team_w_ball):
     for player in team_w_ball:
         if player.color == "yellow":
@@ -382,15 +388,6 @@ def check_goal(team_w_ball):
 
             reset()
 
-# def catch_ball_first(player_w_ball):
-#     if not player_w_ball:
-#         n = random.randint(10,70)
-#         pos_x_to_blue = (new_ball.rect[0] - blue_one.rect[0])/n
-#         pos_y_to_blue = (new_ball.rect[1] - blue_one.rect[1])/n
-#         pos_x_to_yellow = (new_ball.rect[0] - yellow_one.rect[0])/n
-#         pos_y_to_yellow = (new_ball.rect[1] - yellow_one.rect[1])/n
-#         blue_one.move_to((pos_x_to_blue, pos_y_to_blue ))
-#         yellow_one.move_to((pos_x_to_yellow, pos_y_to_yellow ))
 
 def conversion_data_to_dict(blue_team, yellow_team, ball, yellow_goalarea,
                             blue_goalarea, blue_gate, yellow_gate,
@@ -398,17 +395,17 @@ def conversion_data_to_dict(blue_team, yellow_team, ball, yellow_goalarea,
     global all_data
 
     player_with_ball = get_player_with_ball_to_dict(player_w_ball)
-    ball_dict = {"position_x": ball.rect[0],
-                         "position_y": ball.rect[1]}
-    blue_goalarea_dict = {"position_x": blue_goalarea.rect[0],
-                          "position_y": blue_goalarea.rect[1]}
-    yellow_goalarea_dict = {"position_x": yellow_goalarea.rect[0],
-                          "position_y": yellow_goalarea.rect[1]}
-    blue_gate_dict = {"position_x": blue_gate.rect[0],
-                       "position_y": blue_gate.rect[1],
+    ball_dict = {"pos_x": ball.rect[0],
+                         "pos_y": ball.rect[1]}
+    blue_goalarea_dict = {"pos_x": blue_goalarea.rect[0],
+                          "pos_y": blue_goalarea.rect[1]}
+    yellow_goalarea_dict = {"pos_x": yellow_goalarea.rect[0],
+                          "pos_y": yellow_goalarea.rect[1]}
+    blue_gate_dict = {"pos_x": blue_gate.rect[0],
+                       "pos_y": blue_gate.rect[1],
                        "ball": blue_gate.ball}
-    yellow_gate_dict = {"position_x": yellow_gate.rect[0],
-                       "position_y": yellow_gate.rect[1],
+    yellow_gate_dict = {"pos_x": yellow_gate.rect[0],
+                       "pos_y": yellow_gate.rect[1],
                        "ball": yellow_gate.ball}
 
     yellow_team_dict = create_dict_from_team_sprite(yellow_team)
@@ -423,16 +420,18 @@ def get_player_with_ball_to_dict(player_w_ball):
     player_with_ball = {}
     if player_w_ball:
         player_with_ball["name"] = player_w_ball.name
+        player_with_ball["role"] = player_w_ball.role
         player_with_ball["color"] = player_w_ball.color
         player_with_ball["ball"] = player_w_ball.ball
-        player_with_ball["position_x"] = player_w_ball.rect[0]
-        player_with_ball["position_y"] = player_w_ball.rect[1]
+        player_with_ball["pos_x"] = player_w_ball.rect[0]
+        player_with_ball["pos_y"] = player_w_ball.rect[1]
     else:
         player_with_ball["name"] = None
+        player_with_ball["role"] = None
         player_with_ball["color"] = None
         player_with_ball["ball"] = None
-        player_with_ball["position_x"] = None
-        player_with_ball["position_y"] = None
+        player_with_ball["pos_x"] = None
+        player_with_ball["pos_y"] = None
 
     return player_with_ball
 
@@ -441,10 +440,12 @@ def create_dict_from_team_sprite(team):
     for player in team:
         player_dict = {}
         id = player.name
+        player_dict["name"] = player.name
+        player_dict["role"] = player.role
         player_dict["color"] = player.color
         player_dict["ball"] = player.ball
-        player_dict["position_x"] = player.rect[0]
-        player_dict["position_y"] = player.rect[1]
+        player_dict["pos_x"] = player.rect[0]
+        player_dict["pos_y"] = player.rect[1]
         team_dict[id] = player_dict
 
     return team_dict
@@ -453,8 +454,8 @@ def create_dict_from_team_sprite(team):
 
 def update_team_states(team, team_color):
     for player, player_dict in zip(team, all_data[team_color]):
-        player.rect[0] = all_data[team_color][player_dict]["position_x"]
-        player.rect[1] = all_data[team_color][player_dict]["position_y"]
+        player.rect[0] = all_data[team_color][player_dict]["pos_x"]
+        player.rect[1] = all_data[team_color][player_dict]["pos_y"]
         player.ball = all_data[team_color][player_dict]["ball"]
 
 # Variable to keep the main loop running
@@ -534,12 +535,7 @@ def main():
         check_goal(team_w_ball)
         if player_w_ball:
             handle_players_collision(player_w_ball, team_wo_ball, team_w_ball)
-            # closest_player = get_closest_player(team_wo_ball, player_w_ball)
-            # n = random.randint(10,30)
-            # pos_x = (player_w_ball.rect[0] - closest_player.rect[0])/n
-            # pos_y = (player_w_ball.rect[1] - closest_player.rect[1])/n
-            # closest_player.move_to((pos_x,pos_y))
-            # move_players_to_enemy_gate(blue_team, yellow_team, blue_gate, yellow_gate, team_w_ball)
+
 
         if pygame.sprite.spritecollideany(yellow_one, ball):
             # If so, then remove the player and stop the loop
@@ -561,7 +557,7 @@ def main():
             # Update the display
         pygame.display.flip()
         # Ensure program maintains a rate of 30 frames per second
-        clock.tick(25)
+        clock.tick(20)
 
 while True:
     client, address = server.accept()
