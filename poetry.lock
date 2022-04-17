@@ -1,4 +1,12 @@
 [[package]]
+name = "names"
+version = "0.3.0"
+description = "Generate random names"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "pygame"
 version = "2.1.2"
 description = "Python Game Development"
@@ -9,9 +17,12 @@ python-versions = ">=3.6"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "ceabba9b684e4f2ab71d2d4da4968eba8c229599e1fa639f3b9b53711f3f4243"
+content-hash = "e84b6d8542d5ed6d60dd31ee21171b870268884a65381f4e8fe8f3c49f93f641"
 
 [metadata.files]
+names = [
+    {file = "names-0.3.0.tar.gz", hash = "sha256:726e46254f2ed03f1ffb5d941dae3bc67c35123941c29becd02d48d0caa2a671"},
+]
 pygame = [
     {file = "pygame-2.1.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:f149e182d0eeef15d8a9b4c9dad1b87dc6eba3a99bd3c44a777a3a2b053a3dca"},
     {file = "pygame-2.1.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:dc4444d61d48c5546df5137cdf81554887ddb6e2ef1be7f51eb77ea3b6bdd56f"},
